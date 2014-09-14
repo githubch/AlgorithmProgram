@@ -3,44 +3,58 @@
 #include<string.h>
 #include <ctype.h>
 
+bool IsMeetConstrainOfSchemaOfABABA(int lenOfStr, int lenOfA, int lenOfB)
+{
+	return lenOfA % 2 == lenOfStr % 2 && (lenOfStr - 3 * lenOfA) % 2 == 0 && (lenOfB = (lenOfStr - 3 * lenOfA) / 2) >= 1;
+}
+
+bool IsStringEqual(char *str1, char *str2, int len)
+{
+	int inc = 0;
+	while(inc < len && str1[inc] == str2[inc]) inc++;
+	return inc < len ? false : true;
+}
+
+bool IsMeetSchemeOfABABA(char *str, int lenOfA, int lenOfB)
+{
+	return IsStringEqual(str, str + lenOfA + lenOfB, lenOfA) &&
+		IsStringEqual(str, str + (lenOfA + lenOfB) * 2, lenOfA) &&
+		IsStringEqual(str + lenOfA, str + 2 * lenOfA + lenOfB, lenOfB) &&
+		!(lenOfA == lenOfB &&IsStringEqual(str, str + lenOfA, lenOfA));
+}
+
 int IsSchemaOfABABA(char * str){
 	if(str == NULL || strlen(str) < 4)
 		return false;
 	int lenOfStr = strlen(str);
 	int lenOfA = 1;
 	int lenOfB = 1;
-	int mod2OfStr = lenOfStr % 2;
 	for(lenOfA = 1; lenOfA < lenOfStr / 2; lenOfA++)
 	{
-		//should meet the constrains about the relationship among lenOfA, lenOfB, lenOfStr
-		if(lenOfA % 2 == mod2OfStr && (lenOfStr - 3 * lenOfA) % 2 == 0 && (lenOfB = (lenOfStr - 3 * lenOfA) / 2) >= 1)
+		if(IsMeetConstrainOfSchemaOfABABA(lenOfStr, lenOfA, lenOfB = (lenOfStr - 3 * lenOfA) / 2))
 		{
-			int lenOfAB = lenOfA + lenOfB;
-
-			int inc = 0;
-			while(inc < lenOfA && str[inc] == str[lenOfAB + inc]) inc++;
-			if(inc < lenOfA) continue;
-
-			inc = 0;
-			while(inc < lenOfA && str[inc] == str[lenOfAB * 2 + inc]) inc++;
-			if(inc < lenOfA) continue;
-
-			inc = 0;
-			while(inc < lenOfB && str[lenOfA + inc] == str[2 * lenOfA + lenOfB + inc]) inc++;
-			if(inc < lenOfB) continue;
-
-			//A and B should not be same
-			if(lenOfA == lenOfB){
-				inc = 0;
-				while(inc < lenOfA && str[inc] == str[inc + lenOfA])inc++;
-				if(inc == lenOfA)
-					continue;
-			}
-
-			return true;
+			if(IsMeetSchemeOfABABA(str, lenOfA, lenOfB))
+				return true;
 		}
 	}
 	return false;
+}
+
+bool IsMeetConstrainOfSchemaOfABABCAB(int lenOfStr, int lenOfAB, int lenOfC)
+{
+	return lenOfC % 3 == lenOfStr % 3 && (lenOfStr - lenOfC) % 3 == 0 && (lenOfAB = (lenOfStr - lenOfC) / 3) >= 2;
+}
+
+bool IsSameAmongABC(char * str, int lenOfA, int lenOfB, int lenOfC)
+{
+	return lenOfA == lenOfB && IsStringEqual(str, str + lenOfA, lenOfA) ||
+		lenOfA == lenOfC && IsStringEqual(str, str + (lenOfA + lenOfB) * 2, lenOfA) || 
+		lenOfB == lenOfC && IsStringEqual(str + lenOfA, str + (lenOfA + lenOfB) * 2, lenOfB);
+}
+
+bool IsMeetSchemeOfABABCAB(char *str, int lenOfAB, int lenOfC)
+{
+	return IsStringEqual(str, str + lenOfAB, lenOfAB) && IsStringEqual(str, str + lenOfAB * 2 + lenOfC, lenOfAB);
 }
 
 int IsSchemaOfABABCAB(char * str){
@@ -54,42 +68,15 @@ int IsSchemaOfABABCAB(char * str){
 	int lenOfB = 1;
 	for(lenOfC = 1; lenOfC <= lenOfStr - 6; lenOfC ++)
 	{
-		//should meet the constrains of schema of ABABCAB
-		if(lenOfC % 3 == mod3OfStr && (lenOfStr - lenOfC) % 3 == 0 && (lenOfAB = (lenOfStr - lenOfC) / 3) >= 2)
+		if(IsMeetConstrainOfSchemaOfABABCAB(lenOfStr, lenOfAB = (lenOfStr - lenOfC) / 3, lenOfC))
 		{
-			int inc = 0;
-			while(inc < lenOfAB && str[inc] == str[lenOfAB + inc]) inc++;
-			if(inc < lenOfAB) continue;
-
-			inc = 0;
-			while(inc < lenOfAB && str[inc] == str[lenOfAB * 2 + lenOfC + inc]) inc++;
-			if(inc < lenOfAB) continue;
-			
+			if(!IsMeetSchemeOfABABCAB(str, lenOfAB, lenOfC)) continue;
 
 			for(lenOfA = 1; lenOfA < lenOfAB;lenOfA++)
 			{
 				lenOfB = lenOfAB - lenOfA;
-				if(lenOfA == lenOfB)
-				{
-					inc = 0;
-					while(inc < lenOfA && str[inc] == str[lenOfA + inc]) inc++;
-					if(inc == lenOfA) continue;
-				}
-
-				if(lenOfA == lenOfC)
-				{
-					inc = 0;
-					while(inc < lenOfA && str[inc] == str[lenOfAB * 2 + inc]) inc++;
-					if(inc == lenOfA) continue;
-				}
-
-				if(lenOfB == lenOfC)
-				{
-					inc = 0;
-					while(inc < lenOfB && str[lenOfA + inc] == str[lenOfAB * 2 + inc]) inc++;
-					if(inc == lenOfB) continue;
-				}
-				return true;
+				if(!IsSameAmongABC(str, lenOfA, lenOfB, lenOfC))
+					return true;
 			}
 		}
 	}

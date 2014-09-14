@@ -17,3 +17,5 @@ Algorithm/*ipch*
 *.iws
 *.log
 *.pyc
+*.opensdf
+_ReSharper.*
